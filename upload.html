@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GameHub - Developer Upload</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f5f5;
+}
+header{
+  background:#1976d2;
+  color:white;
+  padding:18px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
+}
+.box{
+  background:white;
+  margin:20px;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 2px 8px #ccc;
+}
+input,textarea{
+  width:100%;
+  padding:12px;
+  margin:8px 0 15px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  box-sizing:border-box;
+}
+button{
+  width:100%;
+  padding:13px;
+  background:#1976d2;
+  color:white;
+  border:0;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+}
+.note{
+  color:#777;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>🎮 GameHub Developer</header>
+
+<div class="box">
+
+<h2>Upload Your Game</h2>
+
+<p class="note">
+Only upload games/APKs that you own or have permission to distribute.
+</p>
+
+<label>Game Name</label>
+<input type="text" id="name" placeholder="Enter game name">
+
+<label>Description</label>
+<textarea id="description" rows="5"
+placeholder="Describe your game"></textarea>
+
+<label>Game APK</label>
+<input type="file" id="apk" accept=".apk">
+
+<button onclick="submitGame()">Submit Game</button>
+
+<p id="message"></p>
+
+</div>
+
+<script>
+function submitGame(){
+
+ const name=document.getElementById("name").value.trim();
+ const apk=document.getElementById("apk").files[0];
+
+ if(!name || !apk){
+   document.getElementById("message").innerText=
+   "Please enter game name and select APK.";
+   return;
+ }
+
+ if(!apk.name.toLowerCase().endsWith(".apk")){
+   document.getElementById("message").innerText=
+   "Please select an APK file.";
+   return;
+ }
+
+ document.getElementById("message").innerText=
+ "Game submitted successfully! Backend upload will be connected next.";
+
+}
+</script>
+
+</body>
+</html>

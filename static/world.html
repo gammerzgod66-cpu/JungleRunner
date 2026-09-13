@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌍 Realistic 3D Earth</title>
+
+<style>
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+}
+#globe{
+  width:100%;
+  height:100%;
+}
+.buttons{
+  position:fixed;
+  right:15px;
+  bottom:25px;
+  z-index:10;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+button{
+  width:52px;
+  height:52px;
+  border:0;
+  border-radius:50%;
+  background:white;
+  font-size:28px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="globe"></div>
+
+<div class="buttons">
+  <button id="in">+</button>
+  <button id="out">−</button>
+</div>
+
+<script src="https://unpkg.com/three"></script>
+<script src="https://unpkg.com/globe.gl"></script>
+
+<script>
+const countries = [
+ {name:"🇳🇵 Nepal",lat:28.39,lng:84.12},
+ {name:"🇮🇳 India",lat:20.59,lng:78.96},
+ {name:"🇨🇳 China",lat:35.86,lng:104.19},
+ {name:"🇯🇵 Japan",lat:36.20,lng:138.25},
+ {name:"🇺🇸 USA",lat:37.09,lng:-95.71},
+ {name:"🇨🇦 Canada",lat:56.13,lng:-106.34},
+ {name:"🇧🇷 Brazil",lat:-14.23,lng:-51.92},
+ {name:"🇬🇧 UK",lat:55.37,lng:-3.43},
+ {name:"🇫🇷 France",lat:46.22,lng:2.21},
+ {name:"🇩🇪 Germany",lat:51.16,lng:10.45},
+ {name:"🇦🇺 Australia",lat:-25.27,lng:133.77},
+ {name:"🇷🇺 Russia",lat:61.52,lng:105.31},
+ {name:"🇿🇦 South Africa",lat:-30.55,lng:22.93},
+ {name:"🇪🇬 Egypt",lat:26.82,lng:30.80},
+ {name:"🇸🇦 Saudi Arabia",lat:23.88,lng:45.07}
+];
+
+const globe = Globe()
+(document.getElementById("globe"))
+.globeImageUrl(
+ "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+)
+.globeImageUrl(
+ "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+)
+
+.bumpImageUrl(
+ "https://unpkg.com/three-globe/example/img/earth-topology.png"
+)
+
+.backgroundImageUrl(
+ "https://unpkg.com/three-globe/example/img/night-sky.png"
+)
+
+.showAtmosphere(true)
+.atmosphereColor("#4da6ff")
+.atmosphereAltitude(0.25)
+
+.pointsData(countries)
+.pointLat("lat")
+.pointLng("lng")
+.pointLabel("name")
+.pointColor(() => "#ff3333")
+.pointRadius(0.65)
+.pointAltitude(0.03);
+
+const controls = globe.controls();
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.25;
+controls.enableZoom = true;
+
+
+/* ☁️ MOVING CLOUD LAYER */
+
+const scene = globe.scene();
+
+const cloudGeometry = new THREE.SphereGeometry(101.3, 64, 64);
+
+const cloudMaterial = new THREE.MeshPhongMaterial({
+  map: new THREE.TextureLoader().load(
+    "https://unpkg.com/three-globe/example/img/earth-clouds.png"
+  ),
+  transparent: true,
+  opacity: 0.85,
+  depthWrite: false
+});
+
+const clouds = new THREE.Mesh(
+  cloudGeometry,
+  cloudMaterial
+);
+
+scene.add(clouds);
+
+
+/* ☀️ DAY/NIGHT LIGHT */
+
+// ☀️ Smooth realistic day/night cycle
+
+const sunLight = new THREE.DirectionalLight(
+  0xffffff,
+  2.2
+);
+
+scene.add(sunLight);
+
+const ambientLight = new THREE.AmbientLight(
+  0xffffff,
+  0.12
+);
+
+scene.add(ambientLight);
+
+let sunAngle = 0;
+
+// 60 seconds = complete day/night cycle
+function dayNightCycle() {
+
+  sunAngle += 0.00175;
+
+  const x = Math.cos(sunAngle) * 5;
+  const z = Math.sin(sunAngle) * 5;
+
+  sunLight.position.set(x, 2, z);
+
+  requestAnimationFrame(dayNightCycle);
+}
+
+dayNightCycle();
+
+/* ☁️ Cloud movement */
+
+function animateClouds(){
+
+  clouds.rotation.y += 0.0008;
+
+  requestAnimationFrame(animateClouds);
+}
+
+animateClouds();
+
+
+/* 🔍 Zoom In */
+
+document.getElementById("in").onclick = () => {
+  controls.dollyIn(1.5);
+  controls.update();
+};
+
+
+/* 🔎 Zoom Out */
+
+document.getElementById("out").onclick = () => {
+  controls.dollyOut(1.5);
+  controls.update();
+};
+
+</script>
+
+</body>
+</html>

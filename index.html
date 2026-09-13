@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameHub - Game Store</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#f5f5f5;
+ color:#222;
+ padding-bottom:75px;
+}
+header{
+ background:#1976d2;
+ color:white;
+ padding:18px;
+ text-align:center;
+ font-size:26px;
+ font-weight:bold;
+}
+.search{
+ background:white;
+ padding:15px;
+}
+.search input{
+ width:100%;
+ padding:14px 18px;
+ border:1px solid #ddd;
+ border-radius:30px;
+ font-size:16px;
+}
+h2{padding:0 15px}
+
+.games{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:15px;
+ padding:15px;
+}
+.game{
+ background:white;
+ border-radius:14px;
+ padding:10px;
+ box-shadow:0 2px 8px #ccc;
+}
+.game img{
+ width:100%;
+ height:130px;
+ object-fit:cover;
+ border-radius:10px;
+}
+.game h3{margin:8px 0 4px}
+.game p{
+ margin:4px 0 10px;
+ color:#777;
+}
+button{
+ width:100%;
+ padding:11px;
+ border:0;
+ border-radius:8px;
+ background:#1976d2;
+ color:white;
+ font-weight:bold;
+ font-size:15px;
+}
+
+#detail{
+ display:none;
+ background:white;
+ min-height:100vh;
+ padding-bottom:30px;
+}
+.detail-img{
+ width:100%;
+ height:230px;
+ object-fit:cover;
+}
+.detail-content{padding:20px}
+.back{
+ background:#555;
+ margin-bottom:15px;
+}
+.download{
+ background:#168a35;
+ font-size:17px;
+ padding:14px;
+}
+
+nav{
+ position:fixed;
+ bottom:0;
+ left:0;
+ right:0;
+ background:white;
+ display:flex;
+ justify-content:space-around;
+ padding:13px 5px;
+ box-shadow:0 -2px 8px #ccc;
+}
+nav span{
+ color:#1976d2;
+ font-weight:bold;
+ font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>🎮 GameHub</header>
+
+<div id="home">
+
+<div class="search">
+<input id="search" type="text"
+placeholder="🔍 Search games..."
+onkeyup="searchGames()">
+</div>
+
+<h2>Popular Games</h2>
+
+<div class="games" id="games">
+
+<div class="game">
+<img src="https://picsum.photos/500/300?random=11">
+<h3>Action Hero</h3>
+<p>Action • ⭐ 4.5</p>
+<button onclick="openGame('Action Hero','Action','4.5','https://picsum.photos/800/450?random=11')">View Game</button>
+</div>
+
+<div class="game">
+<img src="https://picsum.photos/500/300?random=12">
+<h3>Speed Racing</h3>
+<p>Racing • ⭐ 4.4</p>
+<button onclick="openGame('Speed Racing','Racing','4.4','https://picsum.photos/800/450?random=12')">View Game</button>
+</div>
+
+<div class="game">
+<img src="https://picsum.photos/500/300?random=13">
+<h3>Battle Arena</h3>
+<p>Battle • ⭐ 4.7</p>
+<button onclick="openGame('Battle Arena','Battle','4.7','https://picsum.photos/800/450?random=13')">View Game</button>
+</div>
+
+<div class="game">
+<img src="https://picsum.photos/500/300?random=14">
+<h3>Football Pro</h3>
+<p>Sports • ⭐ 4.6</p>
+<button onclick="openGame('Football Pro','Sports','4.6','https://picsum.photos/800/450?random=14')">View Game</button>
+</div>
+
+</div>
+</div>
+
+<div id="detail">
+
+<img id="detailImg" class="detail-img">
+
+<div class="detail-content">
+
+<button class="back" onclick="goHome()">← Back</button>
+
+<h1 id="detailName"></h1>
+
+<p id="detailInfo"></p>
+
+<h2>Description</h2>
+
+<p>
+Welcome to GameHub! Enjoy this exciting game.
+Download the game and start playing today.
+</p>
+
+<h2>Game Features</h2>
+
+<p>🎮 Fun gameplay</p>
+<p>⭐ High quality experience</p>
+<p>📱 Mobile friendly</p>
+
+<button class="download" onclick="downloadGame()">
+⬇️ Download Game
+</button>
+
+</div>
+</div>
+
+<nav>
+<span onclick="goHome()">🏠 Home</span>
+<span onclick="goHome()">🎮 Games</span>
+<span onclick="location.href='upload.html'">⬆️ Upload</span>
+<span>👤 Account</span>
+</nav>
+
+<script>
+
+let selectedGame="";
+
+function searchGames(){
+ let text=document.getElementById("search").value.toLowerCase();
+
+ document.querySelectorAll(".game").forEach(function(game){
+   let name=game.querySelector("h3").innerText.toLowerCase();
+
+   game.style.display =
+   name.includes(text) ? "block" : "none";
+ });
+}
+
+function openGame(name,category,rating,image){
+
+ selectedGame=name;
+
+ document.getElementById("home").style.display="none";
+ document.getElementById("detail").style.display="block";
+
+ document.getElementById("detailName").innerText=name;
+
+ document.getElementById("detailInfo").innerText=
+ category+" • ⭐ "+rating;
+
+ document.getElementById("detailImg").src=image;
+
+ window.scrollTo(0,0);
+}
+
+function goHome(){
+ document.getElementById("detail").style.display="none";
+ document.getElementById("home").style.display="block";
+ window.scrollTo(0,0);
+}
+
+function downloadGame(){
+window.location.href="games/mygame(1).apk";}
+
+</script>
+
+</body>
+</html>

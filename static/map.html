@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🗺️ GameHub Map</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    html, body, #map {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  const map = L.map("map").setView([28.3949, 84.1240], 5);
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }
+  ).addTo(map);
+
+  L.marker([28.3949, 84.1240])
+    .addTo(map)
+    .bindPopup("<b>🇳🇵 Nepal</b>")
+    .openPopup();
+
+  L.marker([20.5937, 78.9629])
+    .addTo(map)
+    .bindPopup("<b>🇮🇳 India</b>");
+
+  L.marker([35.8617, 104.1954])
+    .addTo(map)
+    .bindPopup("<b>🇨🇳 China</b>");
+</script>
+
+</body>
+</html>
