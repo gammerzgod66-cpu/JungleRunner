@@ -30,6 +30,15 @@ header{
   border-radius:15px;
   margin-bottom:15px;
 }
+.price{
+  font-size:30px;
+  font-weight:bold;
+  margin:10px 0;
+}
+.small{
+  color:#9ca3af;
+  font-size:14px;
+}
 .coin{
   display:flex;
   justify-content:space-between;
@@ -46,20 +55,10 @@ header{
   padding:9px 14px;
   border-radius:8px;
 }
-.price{
-  font-size:30px;
-  font-weight:bold;
-  margin:10px 0;
-}
-.small{
-  color:#9ca3af;
-  font-size:14px;
-}
 .chart{
   height:180px;
   background:#0d1728;
   border-radius:12px;
-  margin-top:15px;
 }
 canvas{
   width:100%;
@@ -86,6 +85,18 @@ canvas{
   justify-content:space-between;
   margin:10px 0;
 }
+.history{
+  max-height:300px;
+  overflow:auto;
+}
+.history-item{
+  background:#1d2b43;
+  padding:12px;
+  border-radius:10px;
+  margin:8px 0;
+}
+.buyText{color:#4ade80;}
+.sellText{color:#f87171;}
 </style>
 </head>
 
@@ -103,13 +114,11 @@ canvas{
 
 <div class="card">
   <h2>🪙 Demo Coins</h2>
-
   <div id="coinList"></div>
 </div>
 
 <div class="card">
   <h2 id="coinTitle">₿ Bitcoin</h2>
-
   <div class="small">Demo Price</div>
   <div class="price" id="price">$65,000</div>
 
@@ -128,23 +137,30 @@ canvas{
   <div id="portfolio"></div>
 </div>
 
+<div class="card">
+  <h2>🕒 Transaction History</h2>
+  <div id="history" class="history">
+    <div class="small">No transactions yet.</div>
+  </div>
+</div>
+
 </div>
 
 <script>
 
 let balance = 10000;
+let selected = "BTC";
+let transactions = [];
 
 let coins = {
-  BTC:{name:"Bitcoin", symbol:"₿", price:65000, amount:0},
-  ETH:{name:"Ethereum", symbol:"Ξ", price:3500, amount:0},
-  SOL:{name:"Solana", symbol:"◎", price:150, amount:0},
-  DOGE:{name:"Dogecoin", symbol:"Ð", price:0.18, amount:0}
+  BTC:{name:"Bitcoin",symbol:"₿",price:65000,amount:0},
+  ETH:{name:"Ethereum",symbol:"Ξ",price:3500,amount:0},
+  SOL:{name:"Solana",symbol:"◎",price:150,amount:0},
+  DOGE:{name:"Dogecoin",symbol:"Ð",price:0.18,amount:0}
 };
 
-let selected = "BTC";
-
-const canvas = document.getElementById("chart");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("chart");
+const ctx=canvas.getContext("2d");
 
 function money(value){
   return "$"+Number(value).toLocaleString(undefined,{
@@ -160,7 +176,7 @@ function renderCoins(){
 
     let c=coins[key];
 
-    html += `
+    html+=`
       <div class="coin">
         <div>
           <b>${c.symbol} ${c.name}</b><br>
@@ -183,10 +199,10 @@ function selectCoin(key){
 
   let c=coins[key];
 
-  document.getElementById("coinTitle").innerText =
+  document.getElementById("coinTitle").innerText=
     c.symbol+" "+c.name;
 
-  document.getElementById("price").innerText =
+  document.getElementById("price").innerText=
     money(c.price);
 
   drawChart();
@@ -196,19 +212,15 @@ function buy(){
 
   let c=coins[selected];
 
-  if(balance >= c.price){
-
-    balance -= c.price;
-    c.amount += 1;
-
-    alert("Demo BUY successful!");
-
-  }else{
-
+  if(balance < c.price){
     alert("Not enough demo balance.");
-
+    return;
   }
 
+  balance-=c.price;
+  c.amount+=1;
+
+  addTransaction("BUY",selected,c.price);
   update();
 }
 
@@ -216,20 +228,99 @@ function sell(){
 
   let c=coins[selected];
 
-  if(c.amount >= 1){
-
-    c.amount -= 1;
-    balance += c.price;
-
-    alert("Demo SELL successful!");
-
-  }else{
-
-    alert("You don't own this coin.");
-
+  if(c.amount<1){
+    alert("You don't own this demo coin.");
+    return;
   }
 
+  c.amount-=1;
+  balance+=c.price;
+
+  addTransaction("SELL",selected,c.price);
   update();
+}
+
+function addTransaction(type,symbol,price){
+
+  let now=new Date();
+
+  let time=now.toLocaleTimeString();
+
+  transactions.unshift({
+    type:type,
+    symbol:symbol,
+    price:price,
+    time:time
+  });
+
+  renderHistory();
+}
+
+function renderHistory(){
+
+  let box=document.getElementById("history");
+
+  if(transactions.length===0){
+    box.innerHTML=
+      "<div class='small'>No transactions yet.</div>";
+    return;
+  }
+
+  let html="";
+
+  transactions.forEach(t=>{
+
+    let c=coins[t.symbol];
+
+    html+=`
+      <div class="history-item">
+        <b class="${t.type==="BUY"?"buyText":"sellText"}">
+          ${t.type}
+        </b>
+        — ${c.symbol} ${t.symbol}
+        <br>
+        <span class="small">
+          Price: ${money(t.price)} • ${t.time}
+        </span>
+      </div>
+    `;
+  });
+
+  box.innerHTML=html;
+}
+
+function renderPortfolio(){
+
+  let html="";
+  let total=0;
+
+  for(let key in coins){
+
+    let c=coins[key];
+
+    if(c.amount>0){
+
+      let value=c.amount*c.price;
+      total+=value;
+
+      html+=`
+        <div class="info">
+          <span>${c.symbol} ${key}</span>
+          <span>${c.amount.toFixed(4)} — ${money(value)}</span>
+        </div>
+      `;
+    }
+  }
+
+  html+=`
+    <hr>
+    <div class="info">
+      <b>Portfolio Value</b>
+      <b>${money(total)}</b>
+    </div>
+  `;
+
+  document.getElementById("portfolio").innerHTML=html;
 }
 
 function update(){
@@ -238,49 +329,22 @@ function update(){
 
     let c=coins[key];
 
-    let movement=(Math.random()-0.48)*c.price*0.01;
+    c.price+=(Math.random()-0.48)*c.price*0.01;
 
-    c.price += movement;
-
-    if(c.price < 0.0001)
+    if(c.price<0.0001)
       c.price=0.0001;
   }
 
-  document.getElementById("balance").innerText =
+  document.getElementById("balance").innerText=
     money(balance);
 
-  document.getElementById("price").innerText =
+  document.getElementById("price").innerText=
     money(coins[selected].price);
 
   renderCoins();
   renderPortfolio();
+  renderHistory();
   drawChart();
-}
-
-function renderPortfolio(){
-
-  let html="";
-
-  for(let key in coins){
-
-    let c=coins[key];
-
-    if(c.amount > 0){
-
-      html += `
-        <div class="info">
-          <span>${c.symbol} ${key}</span>
-          <span>${c.amount.toFixed(4)}</span>
-        </div>
-      `;
-    }
-  }
-
-  if(html===""){
-    html="<span class='small'>No demo coins yet.</span>";
-  }
-
-  document.getElementById("portfolio").innerHTML=html;
 }
 
 function drawChart(){
@@ -292,16 +356,15 @@ function drawChart(){
   canvas.height=h*2;
 
   ctx.setTransform(2,0,0,2,0,0);
-
   ctx.clearRect(0,0,w,h);
 
   ctx.beginPath();
 
   for(let x=0;x<w;x+=10){
 
-    let y =
-      h*0.55 +
-      Math.sin(x/22)*25 +
+    let y=
+      h*0.55+
+      Math.sin(x/22)*25+
       Math.sin(x/8)*7;
 
     if(x===0)
@@ -317,6 +380,7 @@ function drawChart(){
 
 renderCoins();
 renderPortfolio();
+renderHistory();
 selectCoin("BTC");
 
 setInterval(update,2000);
