@@ -20,9 +20,9 @@ header{
   font-weight:bold;
 }
 .container{
-  padding:20px;
   max-width:700px;
   margin:auto;
+  padding:20px;
 }
 .card{
   background:#162238;
@@ -30,19 +30,36 @@ header{
   border-radius:15px;
   margin-bottom:15px;
 }
+.coin{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#1d2b43;
+  padding:14px;
+  margin:10px 0;
+  border-radius:12px;
+}
+.coin button{
+  background:#2563eb;
+  color:white;
+  border:0;
+  padding:9px 14px;
+  border-radius:8px;
+}
 .price{
-  font-size:32px;
+  font-size:30px;
   font-weight:bold;
   margin:10px 0;
 }
+.small{
+  color:#9ca3af;
+  font-size:14px;
+}
 .chart{
   height:180px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background:#0d1728;
   border-radius:12px;
-  background:linear-gradient(135deg,#14233a,#0d1728);
-  overflow:hidden;
+  margin-top:15px;
 }
 canvas{
   width:100%;
@@ -53,7 +70,7 @@ canvas{
   gap:10px;
   margin-top:15px;
 }
-button{
+.buttons button{
   flex:1;
   padding:14px;
   border:0;
@@ -69,10 +86,6 @@ button{
   justify-content:space-between;
   margin:10px 0;
 }
-.small{
-  color:#9ca3af;
-  font-size:14px;
-}
 </style>
 </head>
 
@@ -84,18 +97,20 @@ button{
 
 <div class="card">
   <div class="small">Virtual Balance</div>
-  <div class="price">$10,000</div>
+  <div class="price" id="balance">$10,000</div>
   <div class="small">Demo money only</div>
 </div>
 
 <div class="card">
-  <h2>BTC / USD</h2>
+  <h2>🪙 Demo Coins</h2>
 
-  <div class="info">
-    <span>Bitcoin</span>
-    <span id="change">+2.35%</span>
-  </div>
+  <div id="coinList"></div>
+</div>
 
+<div class="card">
+  <h2 id="coinTitle">₿ Bitcoin</h2>
+
+  <div class="small">Demo Price</div>
   <div class="price" id="price">$65,000</div>
 
   <div class="chart">
@@ -110,87 +125,202 @@ button{
 
 <div class="card">
   <h2>📊 Portfolio</h2>
-  <div class="info">
-    <span>BTC</span>
-    <span id="coins">0 BTC</span>
-  </div>
-  <div class="info">
-    <span>Demo P/L</span>
-    <span id="profit">$0</span>
-  </div>
+  <div id="portfolio"></div>
 </div>
 
 </div>
 
 <script>
-let price = 65000;
-let coins = 0;
+
 let balance = 10000;
+
+let coins = {
+  BTC:{name:"Bitcoin", symbol:"₿", price:65000, amount:0},
+  ETH:{name:"Ethereum", symbol:"Ξ", price:3500, amount:0},
+  SOL:{name:"Solana", symbol:"◎", price:150, amount:0},
+  DOGE:{name:"Dogecoin", symbol:"Ð", price:0.18, amount:0}
+};
+
+let selected = "BTC";
 
 const canvas = document.getElementById("chart");
 const ctx = canvas.getContext("2d");
 
-function drawChart(){
-  canvas.width = canvas.clientWidth * 2;
-  canvas.height = canvas.clientHeight * 2;
-
-  ctx.scale(2,2);
-
-  let w = canvas.clientWidth;
-  let h = canvas.clientHeight;
-
-  ctx.beginPath();
-  ctx.moveTo(0,h*0.7);
-
-  for(let x=0;x<w;x+=10){
-    let y = h*0.55 + Math.sin(x/25)*25 - x*0.001;
-    ctx.lineTo(x,y);
-  }
-
-  ctx.strokeStyle = "#22c55e";
-  ctx.lineWidth = 3;
-  ctx.stroke();
+function money(value){
+  return "$"+Number(value).toLocaleString(undefined,{
+    maximumFractionDigits:2
+  });
 }
 
-function update(){
-  price += (Math.random()-0.48)*300;
+function renderCoins(){
+
+  let html="";
+
+  for(let key in coins){
+
+    let c=coins[key];
+
+    html += `
+      <div class="coin">
+        <div>
+          <b>${c.symbol} ${c.name}</b><br>
+          <span class="small">${key} • ${money(c.price)}</span>
+        </div>
+
+        <button onclick="selectCoin('${key}')">
+          Trade
+        </button>
+      </div>
+    `;
+  }
+
+  document.getElementById("coinList").innerHTML=html;
+}
+
+function selectCoin(key){
+
+  selected=key;
+
+  let c=coins[key];
+
+  document.getElementById("coinTitle").innerText =
+    c.symbol+" "+c.name;
 
   document.getElementById("price").innerText =
-    "$"+Math.round(price).toLocaleString();
-
-  document.getElementById("coins").innerText =
-    coins.toFixed(5)+" BTC";
-
-  document.getElementById("profit").innerText =
-    "$"+Math.round(coins*price).toLocaleString();
+    money(c.price);
 
   drawChart();
 }
 
 function buy(){
-  if(balance >= price){
-    balance -= price;
-    coins += 1;
+
+  let c=coins[selected];
+
+  if(balance >= c.price){
+
+    balance -= c.price;
+    c.amount += 1;
+
     alert("Demo BUY successful!");
+
   }else{
+
     alert("Not enough demo balance.");
+
   }
+
   update();
 }
 
 function sell(){
-  if(coins >= 1){
-    coins -= 1;
-    balance += price;
+
+  let c=coins[selected];
+
+  if(c.amount >= 1){
+
+    c.amount -= 1;
+    balance += c.price;
+
     alert("Demo SELL successful!");
+
   }else{
-    alert("You don't have BTC.");
+
+    alert("You don't own this coin.");
+
   }
+
   update();
 }
 
+function update(){
+
+  for(let key in coins){
+
+    let c=coins[key];
+
+    let movement=(Math.random()-0.48)*c.price*0.01;
+
+    c.price += movement;
+
+    if(c.price < 0.0001)
+      c.price=0.0001;
+  }
+
+  document.getElementById("balance").innerText =
+    money(balance);
+
+  document.getElementById("price").innerText =
+    money(coins[selected].price);
+
+  renderCoins();
+  renderPortfolio();
+  drawChart();
+}
+
+function renderPortfolio(){
+
+  let html="";
+
+  for(let key in coins){
+
+    let c=coins[key];
+
+    if(c.amount > 0){
+
+      html += `
+        <div class="info">
+          <span>${c.symbol} ${key}</span>
+          <span>${c.amount.toFixed(4)}</span>
+        </div>
+      `;
+    }
+  }
+
+  if(html===""){
+    html="<span class='small'>No demo coins yet.</span>";
+  }
+
+  document.getElementById("portfolio").innerHTML=html;
+}
+
+function drawChart(){
+
+  let w=canvas.clientWidth;
+  let h=canvas.clientHeight;
+
+  canvas.width=w*2;
+  canvas.height=h*2;
+
+  ctx.setTransform(2,0,0,2,0,0);
+
+  ctx.clearRect(0,0,w,h);
+
+  ctx.beginPath();
+
+  for(let x=0;x<w;x+=10){
+
+    let y =
+      h*0.55 +
+      Math.sin(x/22)*25 +
+      Math.sin(x/8)*7;
+
+    if(x===0)
+      ctx.moveTo(x,y);
+    else
+      ctx.lineTo(x,y);
+  }
+
+  ctx.strokeStyle="#22c55e";
+  ctx.lineWidth=3;
+  ctx.stroke();
+}
+
+renderCoins();
+renderPortfolio();
+selectCoin("BTC");
+
 setInterval(update,2000);
-update();
+
 </script>
 
 </body>
